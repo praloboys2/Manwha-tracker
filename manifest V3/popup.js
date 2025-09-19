@@ -1,4 +1,3 @@
-// popup.js (unified for Chromium + Firefox)
 const api = window.browser || window.chrome;
 
 function sendMessage(msg) {
@@ -38,7 +37,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const listDiv = document.getElementById("list");
   const debugDiv = document.getElementById("debug");
   const refreshBtn = document.getElementById("refreshLogs");
+  const resetBtn = document.getElementById("resetStorage");
 
+  // render tracked manhwas
   function renderTracked(data) {
     const keys = Object.keys(data || {}).filter((k) => k !== "__debug_logs__");
     if (keys.length === 0) {
@@ -67,6 +68,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function renderDebug(logs) {
+    if (!window.conditionDebug) {
+      debugDiv.innerHTML = "";
+      return;
+    }
     if (!logs || logs.length === 0) {
       debugDiv.innerHTML = "<p>No debug logs yet.</p>";
       return;
@@ -79,15 +84,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     debugDiv.innerHTML = html;
   }
 
-  // load tracked items
+  // Load tracked items
   const data = await storageGetAll();
   renderTracked(data);
 
+  // Fetch debug logs
   async function fetchDebug() {
     const logs = await sendMessage({ type: "getDebug" });
     renderDebug(logs || []);
   }
 
-  refreshBtn.addEventListener("click", fetchDebug);
+  if (refreshBtn) refreshBtn.addEventListener("click", fetchDebug);
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => {
+      api.storage.local.clear(() => {
+        listDiv.innerHTML = "<p>All data reset!</p>";
+      });
+    });
+  }
+
   fetchDebug();
 });

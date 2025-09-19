@@ -1,26 +1,46 @@
-const sites = [
-  "https://asuracomic.com/manga/",
-  "https://reaperscans.com/series/",
-];
+const api = window.browser || window.chrome;
 
-const currentUrl = window.location.href;
-let matchedSite = sites.find((site) => currentUrl.startsWith(site));
+// Global flag (can be set in console: conditionDebug = true)
+window.conditionDebug = window.conditionDebug || false;
 
-if (matchedSite) {
-  let parts = currentUrl.replace(matchedSite, "").split("/");
+function logDebug(msg, data = null) {
+  if (!window.conditionDebug) return; // Skip logging if flag is false
 
-  let name = parts[0].replace(/-/g, " ");
-  let chapter = parts.find((p) => p.includes("chapter"));
-  if (chapter) {
-    chapter = chapter.replace("chapter-", "");
-  }
-
-  if (name && chapter) {
-    chrome.runtime.sendMessage({
-      type: "saveChapter",
-      name: name,
-      chapter: chapter,
-      url: currentUrl,
-    });
-  }
+  api.runtime.sendMessage({
+    type: "debug",
+    message: msg,
+    data: data,
+    url: location.href,
+  });
 }
+
+function normalizeTitle(title) {
+  return title
+    .split(" ")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+(function () {
+  const url = window.location.href;
+
+  const match = url.match(/\/series\/([^/]+)\/chapter\/(\d+)/i);
+
+  if (match) {
+    let rawName = decodeURIComponent(match[1]).replace(/[-_]/g, " ");
+    rawName = rawName.replace(/\s?[a-f0-9]{6,}$/i, "");
+    const title = normalizeTitle(rawName);
+    const chap = match[2];
+
+    logDebug("✅ URL matched Asura pattern", { title, chapter: chap });
+
+    api.runtime.sendMessage({
+      type: "trackChapter",
+      name: title,
+      chapter: chap,
+      url: url,
+    });
+  } else {
+    logDebug("❌ No chapter pattern matched", { url });
+  }
+})();

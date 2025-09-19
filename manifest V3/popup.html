@@ -1,13 +1,37 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8">
-  <title>Manhwa Tracker</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <h1>📖 Manhwa Tracker</h1>
-  <div id="list"></div>
-  <script src="popup.js"></script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <title>Manhwa Tracker</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      #debug {
+        max-height: 300px;
+        overflow: auto;
+        font-size: 12px;
+        margin-top: 8px;
+      }
+      pre {
+        background: #f6f6f6;
+        padding: 8px;
+        border-radius: 4px;
+      }
+      button {
+        margin-bottom: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>📖 Manhwa Tracker</h1>
+    <div id="list"></div>
+    <div id="debug">
+      <h2>Debug</h2>
+      <button id="refreshLogs">Refresh debug logs</button>
+      <div id="debug">
+        <em>Click "Refresh debug logs" after visiting a page.</em>
+      </div>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
 </html>
